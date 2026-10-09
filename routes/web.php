@@ -18,6 +18,8 @@ Route::middleware([
     })->name('dashboard');
 });
 
-Route::get('admin', [AdminController::class, 'index']);
+Route::middleware('auth')->group(function () {
+    Route::get('admin', [AdminController::class, 'index']);
 
-Route::resource('brands', BrandController::class)->names('brands');
+    Route::resource('brands', BrandController::class)->names('brands');
+});
