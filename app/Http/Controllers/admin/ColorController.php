@@ -77,6 +77,10 @@ class ColorController extends Controller
     public function destroy(Color $color)
     {
         try {
+            if ($color->vehicles()->exists()) {
+                return redirect()->route('colors.index')->with('error', 'No se puede eliminar el color porque tiene vehículos asociados.');
+            }
+
             $color->delete();
 
             return redirect()->route('colors.index')->with('success', 'Color eliminado');

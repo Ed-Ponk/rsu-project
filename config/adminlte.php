@@ -812,6 +812,11 @@ return [
             'icon' => 'bi bi-palette-fill',
         ],
         [
+            'text' => 'Vehículos',
+            'route' => 'vehicles.index',
+            'icon' => 'bi bi-truck',
+        ],
+        [
             'text' => 'multilevel',
             'icon' => 'bi bi-share',
             'submenu' => [
