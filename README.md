@@ -54,6 +54,53 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
+## Desarrollo con Docker/Sail
+
+Este proyecto se ejecuta con [Laravel Sail](https://laravel.com/docs/sail) sobre Docker. No hace falta
+tener PHP, Composer o Node instalados en el host: todos los comandos corren dentro de los contenedores.
+
+Requisito: tener Docker (con el plugin Compose) funcionando.
+
+```bash
+# Alias recomendado para acortar los comandos
+alias sail='./vendor/bin/sail'
+```
+
+### Primer arranque
+
+```bash
+# 1. Instalar dependencias de PHP (si todavía no existe vendor/)
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html \
+  laravelsail/php84-composer:latest composer install --ignore-platform-reqs
+
+# 2. Copiar el entorno y levantar los contenedores (app + MySQL)
+cp .env.example .env
+./vendor/bin/sail up -d
+
+# 3. Preparar la aplicación
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan storage:link
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run build
+```
+
+La aplicación queda disponible en [http://localhost](http://localhost).
+
+### Comandos habituales
+
+```bash
+sail up -d                 # Levantar los contenedores en segundo plano
+sail down                  # Detener y eliminar los contenedores
+sail artisan <comando>     # Ejecutar cualquier comando de Artisan
+sail composer <comando>    # Ejecutar Composer
+sail npm <comando>         # Ejecutar npm
+sail test                  # Atajo para artisan test
+sail artisan test          # Correr la suite de tests (PHPUnit)
+sail shell                 # Abrir una shell dentro del contenedor
+sail mysql                 # Abrir el cliente de MySQL
+```
+
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
