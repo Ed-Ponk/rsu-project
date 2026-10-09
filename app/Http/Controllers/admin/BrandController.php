@@ -119,6 +119,11 @@ class BrandController extends Controller
     {
         try {
             $brand = Brand::find($id);
+
+            if ($brand->vehicleModels()->exists()) {
+                return redirect()->route('brands.index')->with('error', 'No se puede eliminar la marca porque tiene modelos de vehículo asociados.');
+            }
+
             $brand->delete();
             return redirect()->route('brands.index')->with('success', 'Marca eliminada');
         } catch (\Throwable $th) {

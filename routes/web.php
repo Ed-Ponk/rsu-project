@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\BrandController;
 use App\Http\Controllers\admin\ColorController;
+use App\Http\Controllers\admin\VehicleModelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,4 +26,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('brands', BrandController::class)->names('brands');
 
     Route::resource('admin/colors', ColorController::class)->names('colors');
+
+    Route::resource('admin/vehicle-models', VehicleModelController::class)->names('vehicle-models');
 });

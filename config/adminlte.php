@@ -803,7 +803,7 @@ return [
         ],
         [
             'text' => 'Modelos',
-            'url' => 'admin/settings',
+            'route' => 'vehicle-models.index',
             'icon' => 'bi bi-truck-front-fill',
         ],
         [
