@@ -807,6 +807,11 @@ return [
             'icon' => 'bi bi-truck-front-fill',
         ],
         [
+            'text' => 'Colores',
+            'route' => 'colors.index',
+            'icon' => 'bi bi-palette-fill',
+        ],
+        [
             'text' => 'multilevel',
             'icon' => 'bi bi-share',
             'submenu' => [
