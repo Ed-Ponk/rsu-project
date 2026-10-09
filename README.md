@@ -123,7 +123,9 @@ sail mysql                 # Abrir el cliente de MySQL
 ```
 
 Los seeders (`ColorSeeder`, `BrandSeeder`, `VehicleModelSeeder`) usan `updateOrCreate`/`firstOrCreate`,
-por lo que se pueden correr varias veces sin duplicar registros.
+por lo que se pueden correr varias veces sin duplicar registros. El usuario de prueba
+(`test@example.com`) **solo se crea en los entornos `local` y `testing`**; los seeders de catálogos
+se ejecutan en cualquier entorno.
 
 ## Rutas del panel admin
 

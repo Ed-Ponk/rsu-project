@@ -16,13 +16,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => Hash::make('password'),
-            ],
-        );
+        if (app()->environment(['local', 'testing'])) {
+            User::firstOrCreate(
+                ['email' => 'test@example.com'],
+                [
+                    'name' => 'Test User',
+                    'password' => Hash::make('password'),
+                ],
+            );
+        }
 
         $this->call([
             ColorSeeder::class,
