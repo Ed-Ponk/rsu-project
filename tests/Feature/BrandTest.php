@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Brand;
 use App\Models\User;
 use App\Models\VehicleModel;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -163,6 +164,9 @@ class BrandTest extends TestCase
             ->assertSessionHas('error');
 
         $this->assertDatabaseHas('brands', ['id' => $brand->id]);
+
+        $this->expectException(QueryException::class);
+        $brand->delete();
     }
 
     public function test_name_must_be_unique(): void
