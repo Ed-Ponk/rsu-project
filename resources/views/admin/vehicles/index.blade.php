@@ -15,6 +15,53 @@
 
         </div>
         <div class="card-body">
+            <form method="GET" action="{{ route('vehicles.index') }}" class="row g-2 mb-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Placa</label>
+                    <input type="text" name="search" id="search" class="form-control"
+                        value="{{ $filters['search'] ?? '' }}" placeholder="Buscar por placa">
+                </div>
+                <div class="col-md-2">
+                    <label for="filterBrand" class="form-label">Marca</label>
+                    <select name="brand_id" id="filterBrand" class="form-control">
+                        <option value="">Todas</option>
+                        @foreach ($brands as $brand)
+                            <option value="{{ $brand->id }}" @selected((string) ($filters['brand_id'] ?? '') === (string) $brand->id)>
+                                {{ $brand->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filterModel" class="form-label">Modelo</label>
+                    <select name="vehicle_model_id" id="filterModel" class="form-control">
+                        <option value="">Todos</option>
+                        @foreach ($vehicleModels as $vehicleModel)
+                            <option value="{{ $vehicleModel->id }}" data-brand="{{ $vehicleModel->brand_id }}"
+                                @selected((string) ($filters['vehicle_model_id'] ?? '') === (string) $vehicleModel->id)>
+                                {{ $vehicleModel->brand->name }} - {{ $vehicleModel->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="filterColor" class="form-label">Color</label>
+                    <select name="color_id" id="filterColor" class="form-control">
+                        <option value="">Todos</option>
+                        @foreach ($colors as $color)
+                            <option value="{{ $color->id }}" @selected((string) ($filters['color_id'] ?? '') === (string) $color->id)>
+                                {{ $color->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex">
+                    <button type="submit" class="btn btn-primary me-2"><i class="bi bi-search"></i> Filtrar</button>
+                    <a href="{{ route('vehicles.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i>
+                        Limpiar filtros</a>
+                </div>
+            </form>
+
             <table class="table table-striped" id="DataTable">
                 <thead>
                     <tr>
@@ -63,6 +110,10 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <div class="d-flex justify-content-center">
+                {{ $vehicles->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
 
@@ -139,10 +190,37 @@
 
         $(document).ready(function() {
             var table = $('#DataTable').DataTable({
+                "paging": false,
+                "searching": false,
+                "info": false,
                 "language": {
                     "url": "https://cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
                 }
             });
+
+            function filterModels() {
+                var brandId = $('#filterBrand').val();
+
+                $('#filterModel option').each(function() {
+                    var $option = $(this);
+                    var optionBrand = $option.data('brand');
+
+                    if (optionBrand === undefined) {
+                        return;
+                    }
+
+                    var match = !brandId || String(optionBrand) === String(brandId);
+                    $option.prop('hidden', !match).prop('disabled', !match);
+                });
+
+                var selected = $('#filterModel').val();
+                if (selected && $('#filterModel option[value="' + selected + '"]').prop('disabled')) {
+                    $('#filterModel').val('');
+                }
+            }
+
+            $('#filterBrand').on('change', filterModels);
+            filterModels();
         });
     </script>
 

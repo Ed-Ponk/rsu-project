@@ -185,6 +185,143 @@ class VehicleTest extends TestCase
         $response->assertSessionHasErrors('vehicle_model_id');
     }
 
+    public function test_search_by_plate_filters_results(): void
+    {
+        Storage::fake('public');
+
+        [$brand, $model, $color] = $this->catalogs();
+        $this->vehicleWithPlate('ABC-123', $model, $color);
+        $this->vehicleWithPlate('XYZ-999', $model, $color);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['search' => 'ABC']))
+            ->assertOk()
+            ->assertSee('ABC-123')
+            ->assertDontSee('XYZ-999');
+    }
+
+    public function test_search_escapes_like_wildcards(): void
+    {
+        Storage::fake('public');
+
+        [$brand, $model, $color] = $this->catalogs();
+        $this->vehicleWithPlate('ABC-123', $model, $color);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['search' => '%']))
+            ->assertOk()
+            ->assertDontSee('ABC-123');
+    }
+
+    public function test_filter_by_brand(): void
+    {
+        Storage::fake('public');
+
+        $color = Color::factory()->create();
+
+        $brandA = Brand::factory()->create();
+        $modelA = VehicleModel::factory()->create(['brand_id' => $brandA->id]);
+        $this->vehicleWithPlate('PLATE-A1', $modelA, $color);
+
+        $brandB = Brand::factory()->create();
+        $modelB = VehicleModel::factory()->create(['brand_id' => $brandB->id]);
+        $this->vehicleWithPlate('PLATE-B1', $modelB, $color);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['brand_id' => $brandA->id]))
+            ->assertOk()
+            ->assertSee('PLATE-A1')
+            ->assertDontSee('PLATE-B1');
+    }
+
+    public function test_filter_by_vehicle_model(): void
+    {
+        Storage::fake('public');
+
+        $brand = Brand::factory()->create();
+        $color = Color::factory()->create();
+
+        $modelA = VehicleModel::factory()->create(['brand_id' => $brand->id]);
+        $this->vehicleWithPlate('PLATE-M1', $modelA, $color);
+
+        $modelB = VehicleModel::factory()->create(['brand_id' => $brand->id]);
+        $this->vehicleWithPlate('PLATE-M2', $modelB, $color);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['vehicle_model_id' => $modelA->id]))
+            ->assertOk()
+            ->assertSee('PLATE-M1')
+            ->assertDontSee('PLATE-M2');
+    }
+
+    public function test_filter_by_color(): void
+    {
+        Storage::fake('public');
+
+        [$brand, $model] = $this->catalogs();
+
+        $colorA = Color::factory()->create();
+        $this->vehicleWithPlate('PLATE-C1', $model, $colorA);
+
+        $colorB = Color::factory()->create();
+        $this->vehicleWithPlate('PLATE-C2', $model, $colorB);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['color_id' => $colorA->id]))
+            ->assertOk()
+            ->assertSee('PLATE-C1')
+            ->assertDontSee('PLATE-C2');
+    }
+
+    public function test_combined_filters(): void
+    {
+        Storage::fake('public');
+
+        [$brand, $model, $color] = $this->catalogs();
+        $this->vehicleWithPlate('MATCH-01', $model, $color);
+
+        $otherModel = VehicleModel::factory()->create(['brand_id' => $brand->id]);
+        $this->vehicleWithPlate('MATCH-02', $otherModel, $color);
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', [
+                'search' => 'MATCH',
+                'brand_id' => $brand->id,
+                'vehicle_model_id' => $model->id,
+                'color_id' => $color->id,
+            ]))
+            ->assertOk()
+            ->assertSee('MATCH-01')
+            ->assertDontSee('MATCH-02');
+    }
+
+    public function test_pagination_preserves_filters(): void
+    {
+        Storage::fake('public');
+
+        [$brand, $model, $color] = $this->catalogs();
+
+        for ($i = 1; $i <= 20; $i++) {
+            $this->vehicleWithPlate(sprintf('XYZ-%03d', $i), $model, $color);
+        }
+
+        $this->actingAs($this->actingUser())
+            ->get(route('vehicles.index', ['search' => 'XYZ', 'page' => 2]))
+            ->assertOk()
+            ->assertSee('XYZ-016')
+            ->assertDontSee('XYZ-001')
+            ->assertSee('search=XYZ', false);
+    }
+
+    private function vehicleWithPlate(string $plate, VehicleModel $model, Color $color): Vehicle
+    {
+        return Vehicle::factory()->create([
+            'plate' => $plate,
+            'vehicle_model_id' => $model->id,
+            'color_id' => $color->id,
+        ]);
+    }
+
     /**
      * Create a brand, a vehicle model and a color.
      *

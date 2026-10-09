@@ -10,6 +10,7 @@ use App\Models\Color;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
 use App\Support\HandlesImageUpload;
+use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
@@ -18,11 +19,21 @@ class VehicleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $vehicles = Vehicle::with('vehicleModel.brand', 'color')->orderBy('plate')->get();
+        $filters = $request->only(['search', 'brand_id', 'vehicle_model_id', 'color_id']);
 
-        return view('admin.vehicles.index', compact('vehicles'));
+        $vehicles = Vehicle::with('vehicleModel.brand', 'color')
+            ->filter($filters)
+            ->orderBy('plate')
+            ->paginate(15)
+            ->withQueryString();
+
+        $brands = Brand::orderBy('name')->get();
+        $vehicleModels = VehicleModel::with('brand')->orderBy('name')->get();
+        $colors = Color::orderBy('name')->get();
+
+        return view('admin.vehicles.index', compact('vehicles', 'brands', 'vehicleModels', 'colors', 'filters'));
     }
 
     /**
