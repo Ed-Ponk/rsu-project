@@ -47,7 +47,7 @@ class BrandController extends Controller
             Brand::create([
                 'name' => $request->name,
                 'logo' => $logo,
-                'description' => $request->descriptopn
+                'description' => $request->description
             ]);
 
             return redirect()->route('brands.index')->with('success', 'Marca registrada');
