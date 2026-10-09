@@ -17,8 +17,8 @@
         <div class="form-group">
             <div id="imageButton" style="width: 100%; text-align:center; padding:10px;">
                 <img id="imagePreview"
-                    src={{ empty($brand->logo) ? asset('storage/images/no_logo.png') : asset($brand->logo) }}
-                    alt="Vista previa de la imagen" style="width: 100%;height:180px;cursor: pointer;">
+                    src="{{ isset($brand) ? $brand->logo_url : asset('images/no_logo.svg') }}"
+                    alt="Vista previa de la imagen" style="width: 100%;height:180px;object-fit:cover;cursor: pointer;">
                 <p style="font-size:12px">Haga click para seleccionar una imagen</p>
             </div>
         </div>
@@ -30,6 +30,12 @@
             ]) !!}
             <!--<button type="button" class="btn btn-primary" id="_imageButton"><i class="fas fa-image"></i> Imagen</button>-->
         </div>
+        @if (isset($brand) && $brand->logo)
+            <div class="form-check">
+                {!! Form::checkbox('remove_logo', 1, false, ['class' => 'form-check-input', 'id' => 'remove_logo']) !!}
+                <label class="form-check-label" for="remove_logo">Eliminar logo actual</label>
+            </div>
+        @endif
     </div>
 </div>
 

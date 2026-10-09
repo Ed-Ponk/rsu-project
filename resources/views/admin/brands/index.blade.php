@@ -30,8 +30,8 @@
                 <tbody>
                     @foreach ($brands as $brand)
                         <tr>
-                            <td><img src={{ $brand->logo == '' ? asset('/storage/images/no_logo.png') : asset($brand->logo) }}
-                                    style="width:70px; height:50px;"></td>
+                            <td><img src="{{ $brand->logo_url }}" alt="Logo {{ $brand->name }}"
+                                    style="width:70px; height:50px;object-fit:cover;"></td>
                             <td>{{ $brand->name }}</td>
                             <td>{{ $brand->description }}</td>
                             <td>{{ $brand->created_at }}</td>

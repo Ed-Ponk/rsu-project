@@ -9,10 +9,12 @@ use App\Models\Brand;
 use App\Models\Color;
 use App\Models\Vehicle;
 use App\Models\VehicleModel;
-use Illuminate\Support\Facades\Storage;
+use App\Support\HandlesImageUpload;
 
 class VehicleController extends Controller
 {
+    use HandlesImageUpload;
+
     /**
      * Display a listing of the resource.
      */
@@ -42,7 +44,7 @@ class VehicleController extends Controller
             $data = $request->validated();
 
             if ($request->hasFile('image')) {
-                $storedImage = $request->file('image')->store('vehicles', 'public');
+                $storedImage = $this->storeImage($request->file('image'), 'vehicles');
                 $data['image'] = $storedImage;
             }
 
@@ -51,7 +53,7 @@ class VehicleController extends Controller
             return redirect()->route('vehicles.index')->with('success', 'Vehículo registrado');
         } catch (\Throwable $th) {
             if ($storedImage) {
-                Storage::disk('public')->delete($storedImage);
+                $this->deleteImage($storedImage);
             }
 
             return back()->withInput()->with('error', 'Error en el registro: ' . $th->getMessage());
@@ -90,7 +92,7 @@ class VehicleController extends Controller
             $data = $request->validated();
 
             if ($request->hasFile('image')) {
-                $newImage = $request->file('image')->store('vehicles', 'public');
+                $newImage = $this->storeImage($request->file('image'), 'vehicles');
                 $data['image'] = $newImage;
                 $deleteOld = true;
             } elseif ($request->boolean('remove_image')) {
@@ -101,13 +103,13 @@ class VehicleController extends Controller
             $vehicle->update($data);
 
             if ($deleteOld && $oldImage) {
-                Storage::disk('public')->delete($oldImage);
+                $this->deleteImage($oldImage);
             }
 
             return redirect()->route('vehicles.index')->with('success', 'Vehículo actualizado');
         } catch (\Throwable $th) {
             if ($newImage) {
-                Storage::disk('public')->delete($newImage);
+                $this->deleteImage($newImage);
             }
 
             return back()->withInput()->with('error', 'Error en la actualización: ' . $th->getMessage());
@@ -121,7 +123,7 @@ class VehicleController extends Controller
     {
         try {
             if ($vehicle->image) {
-                Storage::disk('public')->delete($vehicle->image);
+                $this->deleteImage($vehicle->image);
             }
 
             $vehicle->delete();
